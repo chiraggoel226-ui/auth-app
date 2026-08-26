@@ -28,7 +28,7 @@ public class UserDto {
     private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();
     private String gender;
-    private Provider provider=Provider.Local;
+    private Provider provider=Provider.LOCAL;
     private Set<RoleDto> roles = new HashSet<>();
 }
 

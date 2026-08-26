@@ -1,5 +1,6 @@
 package com.substring.auth.auth_app.repositories;
 
+import com.substring.auth.auth_app.dtos.UserDto;
 import com.substring.auth.auth_app.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,4 +11,6 @@ public interface  UserRepository extends JpaRepository<User, UUID>{
 
 
     boolean existsByEmail(String email);
+
+    Optional<User> findByEmail(String email);
 }
