@@ -62,7 +62,7 @@ public class SecurityConfig {
 
                 // ==========================================
                 // SESSION
-                // OAuth2 requires session during login
+                // OAuth2 requires session
                 // ==========================================
 
                 .sessionManagement(
@@ -80,51 +80,32 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authorize -> authorize
 
-                                // ==================================
                                 // NORMAL AUTH APIs
-                                // ==================================
-
                                 .requestMatchers(
                                         "/api/v1/auth/**"
                                 )
                                 .permitAll()
 
-
-                                // ==================================
-                                // OAUTH2
-                                // ==================================
-
+                                // OAuth2 authorization
                                 .requestMatchers(
                                         "/oauth2/**"
                                 )
                                 .permitAll()
 
-
-                                // ==================================
-                                // OAUTH2 CALLBACK
-                                // ==================================
-
+                                // OAuth2 callback
                                 .requestMatchers(
                                         "/login/**"
                                 )
                                 .permitAll()
 
-
-                                // ==================================
-                                // CORS PREFLIGHT
-                                // ==================================
-
+                                // CORS
                                 .requestMatchers(
                                         HttpMethod.OPTIONS,
                                         "/**"
                                 )
                                 .permitAll()
 
-
-                                // ==================================
-                                // OTHER APIs
-                                // ==================================
-
+                                // Everything else
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -132,8 +113,9 @@ public class SecurityConfig {
 
                 // ==========================================
                 // EXCEPTION HANDLING
-                // API -> 401
-                // No redirect to /login for API requests
+                //
+                // IMPORTANT:
+                // API REQUESTS MUST NEVER REDIRECT TO /LOGIN
                 // ==========================================
 
                 .exceptionHandling(
@@ -150,7 +132,7 @@ public class SecurityConfig {
 
 
                 // ==========================================
-                // DISABLE DEFAULT FORM LOGIN
+                // DISABLE FORM LOGIN
                 // ==========================================
 
                 .formLogin(
@@ -205,7 +187,7 @@ public class SecurityConfig {
 
 
     // ==========================================
-    // CORS CONFIGURATION
+    // CORS
     // ==========================================
 
     @Bean
@@ -215,10 +197,6 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
 
-        // ==========================================
-        // ALLOWED ORIGINS
-        // ==========================================
-
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:5173",
@@ -227,10 +205,6 @@ public class SecurityConfig {
                 )
         );
 
-
-        // ==========================================
-        // ALLOWED METHODS
-        // ==========================================
 
         configuration.setAllowedMethods(
                 List.of(
@@ -244,28 +218,17 @@ public class SecurityConfig {
         );
 
 
-        // ==========================================
-        // ALLOWED HEADERS
-        // ==========================================
-
         configuration.setAllowedHeaders(
                 List.of("*")
         );
 
 
-        // ==========================================
-        // CREDENTIALS
-        // ==========================================
-
         configuration.setAllowCredentials(true);
 
 
-        // ==========================================
-        // REGISTER CORS CONFIGURATION
-        // ==========================================
-
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
+
 
         source.registerCorsConfiguration(
                 "/**",
