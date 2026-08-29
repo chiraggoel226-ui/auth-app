@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.AllArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -34,6 +35,9 @@ public class OAuth2AuthenticationSuccessHandler
     private final JwtService jwtService;
 
     private final OAuth2AuthorizedClientService authorizedClientService;
+
+    @Value("${frontend.url:http://localhost:5173}")
+    private String frontendUrl;
 
 
     @Override
@@ -244,20 +248,16 @@ public class OAuth2AuthenticationSuccessHandler
         // REDIRECT TO REACT
         // ==========================================
 
-        String frontendUrl =
-                "http://localhost:5173";
-
         String redirectUrl =
                 frontendUrl
                         + "/oauth2/success?token="
                         + token;
 
-        response.sendRedirect(
-                redirectUrl
-        );
+        response.sendRedirect(redirectUrl);
 
         System.out.println(
-                "Redirecting to React..."
+                "Redirecting to React: "
+                        + redirectUrl
         );
     }
 
