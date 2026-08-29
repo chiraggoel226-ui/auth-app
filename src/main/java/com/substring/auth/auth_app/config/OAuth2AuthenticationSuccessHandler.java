@@ -9,8 +9,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import lombok.AllArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -26,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@AllArgsConstructor
 public class OAuth2AuthenticationSuccessHandler
         implements AuthenticationSuccessHandler {
 
@@ -38,6 +35,21 @@ public class OAuth2AuthenticationSuccessHandler
 
     @Value("${frontend.url:http://localhost:5173}")
     private String frontendUrl;
+
+
+    // ==========================================
+    // CONSTRUCTOR
+    // ==========================================
+
+    public OAuth2AuthenticationSuccessHandler(
+            UserService userService,
+            JwtService jwtService,
+            OAuth2AuthorizedClientService authorizedClientService
+    ) {
+        this.userService = userService;
+        this.jwtService = jwtService;
+        this.authorizedClientService = authorizedClientService;
+    }
 
 
     @Override
