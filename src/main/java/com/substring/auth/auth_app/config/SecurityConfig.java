@@ -114,19 +114,44 @@ public class SecurityConfig {
                 // ==========================================
                 // EXCEPTION HANDLING
                 //
-                // IMPORTANT:
-                // API REQUESTS MUST NEVER REDIRECT TO /LOGIN
+                // FIX (was the bug):
+                // ------------------------------------------
+                // The old config used
+                // defaultAuthenticationEntryPointFor(...) scoped
+                // to "/api/**" only. Because .oauth2Login() is
+                // also enabled below, Spring Security
+                // internally registers its OWN default
+                // AuthenticationEntryPoint
+                // (LoginUrlAuthenticationEntryPoint -> "/login").
+                //
+                // Depending on internal configurer ordering,
+                // that OAuth2 entry point can win over the
+                // path-scoped one for ANY AuthenticationException
+                // thrown during a request - including ones
+                // thrown deep inside your controller/service
+                // layer (e.g. from getUserByEmail()), even on a
+                // permitAll() endpoint like /api/v1/auth/login.
+                //
+                // That is why POST /api/v1/auth/login was
+                // returning "302 Found" with
+                // "Location: https://.../login" instead of a
+                // JSON 401/error response.
+                //
+                // FIX: make HttpStatusEntryPoint(401) the
+                // single, UNCONDITIONAL default entry point for
+                // the whole app. This is safe because OAuth2
+                // redirects (e.g. /oauth2/authorization/google)
+                // are triggered by explicit navigation to that
+                // URL, NOT by AuthenticationException handling,
+                // so this change does not break OAuth2 login.
                 // ==========================================
 
                 .exceptionHandling(
                         exception -> exception
-                                .defaultAuthenticationEntryPointFor(
+                                .authenticationEntryPoint(
                                         new HttpStatusEntryPoint(
                                                 HttpStatus.UNAUTHORIZED
-                                        ),
-                                        request ->
-                                                request.getRequestURI()
-                                                        .startsWith("/api/")
+                                        )
                                 )
                 )
 
