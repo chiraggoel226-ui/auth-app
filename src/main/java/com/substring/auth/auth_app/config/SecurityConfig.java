@@ -1,12 +1,12 @@
 package com.substring.auth.auth_app.config;
 
 import com.substring.auth.auth_app.Security.JwtAuthenticationFilter;
-
 import lombok.AllArgsConstructor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.security.config.Customizer;
@@ -18,9 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import org.springframework.web.cors.CorsConfiguration;
@@ -40,10 +37,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 
-    // =========================================================
-    // SECURITY FILTER CHAIN
-    // =========================================================
-
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
@@ -52,30 +45,27 @@ public class SecurityConfig {
 
         http
 
-                // =================================================
+                // ==========================================
                 // CORS
-                // =================================================
+                // ==========================================
 
                 .cors(
                         Customizer.withDefaults()
                 )
 
 
-                // =================================================
+                // ==========================================
                 // CSRF
-                // =================================================
+                // ==========================================
 
                 .csrf(
                         csrf -> csrf.disable()
                 )
 
 
-                // =================================================
+                // ==========================================
                 // SESSION
-                //
-                // IF_REQUIRED is important because OAuth2 login
-                // uses a session during the OAuth flow.
-                // =================================================
+                // ==========================================
 
                 .sessionManagement(
                         session -> session
@@ -85,18 +75,18 @@ public class SecurityConfig {
                 )
 
 
-                // =================================================
+                // ==========================================
                 // AUTHORIZATION
-                // =================================================
+                // ==========================================
 
                 .authorizeHttpRequests(
 
                         authorize -> authorize
 
 
-                                // -------------------------------------------------
+                                // ==================================
                                 // NORMAL AUTH APIs
-                                // -------------------------------------------------
+                                // ==================================
 
                                 .requestMatchers(
                                         "/api/v1/auth/**"
@@ -104,9 +94,9 @@ public class SecurityConfig {
                                 .permitAll()
 
 
-                                // -------------------------------------------------
-                                // OAUTH2 AUTHORIZATION
-                                // -------------------------------------------------
+                                // ==================================
+                                // OAUTH2
+                                // ==================================
 
                                 .requestMatchers(
                                         "/oauth2/**"
@@ -114,78 +104,65 @@ public class SecurityConfig {
                                 .permitAll()
 
 
-                                // -------------------------------------------------
-                                // OAUTH2 CALLBACK
-                                // -------------------------------------------------
-
                                 .requestMatchers(
                                         "/login/**"
                                 )
                                 .permitAll()
 
 
-                                // -------------------------------------------------
-                                // ALL OTHER APIs
-                                // -------------------------------------------------
+                                // ==================================
+                                // OPTIONS / CORS
+                                // ==================================
+
+                                .requestMatchers(
+                                        HttpMethod.OPTIONS,
+                                        "/**"
+                                )
+                                .permitAll()
+
+
+                                // ==================================
+                                // EVERYTHING ELSE
+                                // ==================================
 
                                 .anyRequest()
                                 .authenticated()
                 )
 
 
-                // =================================================
-                // RETURN 401 FOR API REQUESTS
-                //
-                // VERY IMPORTANT:
-                //
-                // Without this, Spring Security can redirect an
-                // unauthenticated API request to the OAuth2 login
-                // page and return HTML.
-                //
-                // That was causing:
-                //
-                // "<!DOCTYPE html>"
-                //
-                // instead of JSON.
-                // =================================================
+                // ==========================================
+                // API 401 INSTEAD OF OAUTH LOGIN PAGE
+                // ==========================================
 
                 .exceptionHandling(
-
                         exception -> exception
-
                                 .defaultAuthenticationEntryPointFor(
-
                                         new HttpStatusEntryPoint(
                                                 HttpStatus.UNAUTHORIZED
                                         ),
-
-                                        new AntPathRequestMatcher(
-                                                "/api/**"
-                                        )
+                                        request ->
+                                                request.getRequestURI()
+                                                        .startsWith("/api/")
                                 )
                 )
 
 
-                // =================================================
+                // ==========================================
                 // JWT FILTER
-                // =================================================
+                // ==========================================
 
                 .addFilterBefore(
-
                         jwtAuthenticationFilter,
-
                         UsernamePasswordAuthenticationFilter.class
                 )
 
 
-                // =================================================
+                // ==========================================
                 // OAUTH2 LOGIN
-                // =================================================
+                // ==========================================
 
                 .oauth2Login(
-
                         oauth2 -> oauth2
-
                                 .successHandler(
                                         successHandler
                                 )
@@ -196,9 +173,9 @@ public class SecurityConfig {
     }
 
 
-    // =========================================================
+    // ==========================================
     // PASSWORD ENCODER
-    // =========================================================
+    // ==========================================
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -207,45 +184,28 @@ public class SecurityConfig {
     }
 
 
-    // =========================================================
-    // CORS CONFIGURATION
-    // =========================================================
+    // ==========================================
+    // CORS
+    // ==========================================
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
 
         CorsConfiguration configuration =
                 new CorsConfiguration();
 
 
-        // =========================================================
-        // ALLOWED FRONTENDS
-        // =========================================================
-
         configuration.setAllowedOrigins(
-
                 List.of(
-
-                        // Local Vite
                         "http://localhost:5173",
-
                         "http://localhost:5174",
-
-                        // Production Vercel
                         "https://auth-app-frontend-eta.vercel.app"
                 )
         );
 
 
-        // =========================================================
-        // ALLOWED METHODS
-        // =========================================================
-
         configuration.setAllowedMethods(
-
                 List.of(
-
                         "GET",
                         "POST",
                         "PUT",
@@ -255,27 +215,13 @@ public class SecurityConfig {
         );
 
 
-        // =========================================================
-        // ALLOWED HEADERS
-        // =========================================================
-
         configuration.setAllowedHeaders(
                 List.of("*")
         );
 
 
-        // =========================================================
-        // CREDENTIALS
-        // =========================================================
+        configuration.setAllowCredentials(true);
 
-        configuration.setAllowCredentials(
-                true
-        );
-
-
-        // =========================================================
-        // REGISTER CORS
-        // =========================================================
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
