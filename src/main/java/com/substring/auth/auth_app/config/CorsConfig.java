@@ -21,7 +21,8 @@ public class CorsConfig {
                         .addMapping("/**")
                         .allowedOrigins(
                                 "http://localhost:5173",
-                                "http://localhost:5174"
+                                "http://localhost:5174",
+                                "https://auth-app-frontend-eta.vercel.app"
                         )
                         .allowedMethods(
                                 "GET",
