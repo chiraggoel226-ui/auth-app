@@ -67,10 +67,6 @@ public class SecurityConfig {
                 // ============================
                 // SESSION
                 // ============================
-                // OAuth2 needs a temporary session
-                // during Google/GitHub authentication.
-                // JWT authentication is still handled
-                // by JwtAuthenticationFilter.
 
                 .sessionManagement(
                         session -> session
@@ -117,7 +113,6 @@ public class SecurityConfig {
 
 
                                 // Everything else
-                                // requires authentication
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -165,7 +160,7 @@ public class SecurityConfig {
 
 
     // ================================
-    // CORS
+    // CORS CONFIGURATION
     // ================================
 
     @Bean
@@ -177,13 +172,22 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
 
+        // ================================
+        // ALLOWED FRONTENDS
+        // ================================
+
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:5173",
-                        "http://localhost:5174"
+                        "http://localhost:5174",
+                        "https://auth-app-frontend-eta.vercel.app"
                 )
         );
 
+
+        // ================================
+        // ALLOWED METHODS
+        // ================================
 
         configuration.setAllowedMethods(
                 List.of(
@@ -196,15 +200,27 @@ public class SecurityConfig {
         );
 
 
+        // ================================
+        // ALLOWED HEADERS
+        // ================================
+
         configuration.setAllowedHeaders(
                 List.of("*")
         );
 
 
+        // ================================
+        // CREDENTIALS
+        // ================================
+
         configuration.setAllowCredentials(
                 true
         );
 
+
+        // ================================
+        // REGISTER CORS
+        // ================================
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
